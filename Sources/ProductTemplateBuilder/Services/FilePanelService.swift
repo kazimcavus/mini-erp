@@ -3,8 +3,9 @@ import Foundation
 
 enum FilePanelService {
     @MainActor
-    static func chooseXLSX() -> URL? {
+    static func chooseXLSX(title: String? = nil) -> URL? {
         let panel = NSOpenPanel()
+        if let title { panel.title = title }
         panel.allowedContentTypes = [.init(filenameExtension: "xlsx")!]
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false

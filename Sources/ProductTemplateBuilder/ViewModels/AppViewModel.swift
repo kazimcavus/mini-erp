@@ -15,10 +15,13 @@ final class AppViewModel: ObservableObject {
     @Published var introLabels: [IntroType: String] = Dictionary(uniqueKeysWithValues: EmbeddedCatalog.introTemplates.map { ($0.id, $0.label) })
     @Published var status: AppStatus = .idle
     @Published var editingProduct: ProductEntry?
+    @Published var technicalDetailDraft: TechnicalDetailDraft?
 
     private let reader = ExcelReader()
     private let writer = ExcelWriter()
     private let mapper = TemplateMapper()
+    private let relatedProductsBuilder = RelatedProductsBuilder()
+    private let technicalDetailsBuilder = TechnicalDetailsBuilder()
 
     init() {
         if let selection = EmbeddedCatalog.categorySelections.first {
@@ -180,6 +183,94 @@ final class AppViewModel: ObservableObject {
             )
             try writer.write(templateURL: templateURL, outputURL: outputURL, headers: headers, rows: outputRows)
             status = .success("Excel şablonu \(outputRows.count) satırla oluşturuldu.")
+        } catch {
+            status = .failure(error.localizedDescription)
+        }
+    }
+
+    func exportRelatedProductsTemplate() {
+        guard let sourceURL = FilePanelService.chooseXLSX(title: "Ticimax ürün listesini seç") else { return }
+        guard let outputURL = FilePanelService.saveXLSX(defaultName: "urun-ilgili-urunler.xlsx") else { return }
+
+        do {
+            let table = try reader.readFirstSheet(from: sourceURL)
+            let rows = try relatedProductsBuilder.makeRows(from: table)
+            guard !rows.isEmpty else {
+                status = .warning("Aynı OZELALAN1 değerine göre ilgili ürün satırı bulunamadı.")
+                return
+            }
+            try writer.writeRelatedProducts(outputURL: outputURL, rows: rows)
+            status = .success("İlgili ürünler Excel'i \(rows.count) satırla oluşturuldu.")
+        } catch {
+            status = .failure(error.localizedDescription)
+        }
+    }
+
+    func prepareTechnicalDetailsTemplate() {
+        guard let ticimaxURL = FilePanelService.chooseXLSX(title: "Ticimax ürün listesini seç") else { return }
+        guard let sourceURL = FilePanelService.chooseXLSX(title: "Ürünler.xlsx teknik detay kaynak listesini seç") else { return }
+
+        do {
+            let ticimaxTable = try reader.readFirstSheet(from: ticimaxURL)
+            let sourceTable = try reader.readFirstSheet(from: sourceURL)
+            let prepared = try technicalDetailsBuilder.products(from: ticimaxTable, sourceTable: sourceTable)
+            guard !prepared.products.isEmpty else {
+                status = .warning("STOKKODU eşleşmesi bulunan ürün bulunamadı.")
+                return
+            }
+            technicalDetailDraft = TechnicalDetailDraft(
+                ticimaxTable: ticimaxTable,
+                sourceTable: sourceTable,
+                products: prepared.products,
+                selectedOriginStockCodes: Set(prepared.products.map(\.stockCode)),
+                missingSourceStockCodes: prepared.missingSourceStockCodes
+            )
+            let missingMessage = prepared.missingSourceStockCodes.isEmpty ? "" : " \(prepared.missingSourceStockCodes.count) STOKKODU kaynak listede bulunamadı."
+            status = .success("\(prepared.products.count) ürün Menşei seçimi için hazır.\(missingMessage)")
+        } catch {
+            status = .failure(error.localizedDescription)
+        }
+    }
+
+    func setOriginSelected(stockCode: String, isSelected: Bool) {
+        guard var draft = technicalDetailDraft else { return }
+        if isSelected {
+            draft.selectedOriginStockCodes.insert(stockCode)
+        } else {
+            draft.selectedOriginStockCodes.remove(stockCode)
+        }
+        technicalDetailDraft = draft
+    }
+
+    func selectAllOrigins() {
+        guard var draft = technicalDetailDraft else { return }
+        draft.selectedOriginStockCodes = Set(draft.products.map(\.stockCode))
+        technicalDetailDraft = draft
+    }
+
+    func clearAllOrigins() {
+        guard var draft = technicalDetailDraft else { return }
+        draft.selectedOriginStockCodes = []
+        technicalDetailDraft = draft
+    }
+
+    func exportTechnicalDetailsTemplate() {
+        guard let draft = technicalDetailDraft else { return }
+        guard let outputURL = FilePanelService.saveXLSX(defaultName: "urun-teknik-detaylari.xlsx") else { return }
+
+        do {
+            let rows = try technicalDetailsBuilder.makeRows(
+                ticimaxTable: draft.ticimaxTable,
+                sourceTable: draft.sourceTable,
+                originStockCodes: draft.selectedOriginStockCodes
+            )
+            guard !rows.isEmpty else {
+                status = .warning("Teknik detay satırı oluşturulamadı.")
+                return
+            }
+            try writer.writeTechnicalDetails(outputURL: outputURL, rows: rows)
+            technicalDetailDraft = nil
+            status = .success("Teknik detaylar Excel'i \(rows.count) satırla oluşturuldu.")
         } catch {
             status = .failure(error.localizedDescription)
         }

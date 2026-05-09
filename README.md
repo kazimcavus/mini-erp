@@ -26,6 +26,8 @@ Ana şablon dosyasının yolu kodda sabittir: `Sources/ProductTemplateBuilder/Mo
 - Barkod sırası, `VARYASYONKODU` ve şablon başlıklarına göre eşleştirme  
 - İndirimli fiyat: en yakın **5 TL** adımına yuvarlama; liste/satış fiyatı seçilen indirim kuralına göre  
 - Türkçe fiyat gösterimi (virgül ondalık, binlik ayraçsız çıktı); Excel hücreleri sade (beyaz) bırakılır  
+- Ticimax'tan indirilen ürün listesindeki aynı `OZELALAN1` gruplarından ilgili ürünler Excel'i üretir
+- Ticimax ürün listesi + `Ürünler.xlsx` teknik kaynak listesinden `urunteknikdetaylari` formatında teknik detay Excel'i üretir; `Menşei` satırı STOKKODU bazında seçilebilir
 
 ## Akış
 
@@ -33,6 +35,8 @@ Ana şablon dosyasının yolu kodda sabittir: `Sources/ProductTemplateBuilder/Mo
 2. **Ürün Ekle** ile stok kodu, ürün adı, renk satırları ve `Bilgiler.xlsx` seçimi.  
 3. Kategori ağacından kategori / breadcrumb seçimi.  
 4. **Excel şablonu oluştur** ile çıktı `.xlsx` kaydı.  
+5. **İlgili Ürünler Oluştur** ile Ticimax ürün listesini seçip `URUNKARTIID` / `ILGILIURUNKARTIID` dosyası üretimi.  
+6. **Teknik Detaylar Oluştur** ile Ticimax ürün listesini ve `Ürünler.xlsx` kaynak listesini seçip Menşei eklenecek STOKKODU satırlarını onaylama.  
 
 ## Geliştirme
 

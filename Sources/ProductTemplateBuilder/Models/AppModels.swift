@@ -146,6 +146,36 @@ struct TemplateRow {
     var values: [String: String]
 }
 
+struct RelatedProductRow: Equatable {
+    var productCardID: String
+    var relatedProductCardID: String
+}
+
+struct TechnicalDetailRow: Equatable {
+    var productCardID: String
+    var stockCode: String
+    var productName: String
+    var definition: String
+    var property: String
+    var value: String
+}
+
+struct TechnicalDetailProductSelection: Identifiable, Equatable {
+    var id: String { stockCode }
+    var productCardID: String
+    var stockCode: String
+    var productName: String
+}
+
+struct TechnicalDetailDraft: Identifiable {
+    let id = UUID()
+    var ticimaxTable: WorkbookTable
+    var sourceTable: WorkbookTable
+    var products: [TechnicalDetailProductSelection]
+    var selectedOriginStockCodes: Set<String>
+    var missingSourceStockCodes: [String]
+}
+
 enum AppStatus: Equatable {
     case idle
     case success(String)

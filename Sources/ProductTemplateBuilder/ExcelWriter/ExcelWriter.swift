@@ -1,6 +1,44 @@
 import Foundation
 
 final class ExcelWriter {
+    func writeRelatedProducts(outputURL: URL, rows: [RelatedProductRow]) throws {
+        try writeSimpleWorkbook(
+            outputURL: outputURL,
+            headers: ["URUNKARTIID", "ILGILIURUNKARTIID"],
+            rows: rows.map { [$0.productCardID, $0.relatedProductCardID] }
+        )
+    }
+
+    func writeTechnicalDetails(outputURL: URL, rows: [TechnicalDetailRow]) throws {
+        try writeSimpleWorkbook(
+            outputURL: outputURL,
+            headers: ["UrunKartID", "StokKodu", "UrunAdi", "Tanim", "Ozellik", "Deger"],
+            rows: rows.map { [$0.productCardID, $0.stockCode, $0.productName, $0.definition, $0.property, $0.value] }
+        )
+    }
+
+    private func writeSimpleWorkbook(outputURL: URL, headers: [String], rows: [[String]]) throws {
+        let workingURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("simple-workbook-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: workingURL, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: workingURL) }
+
+        try FileManager.default.createDirectory(at: workingURL.appendingPathComponent("_rels", isDirectory: true), withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: workingURL.appendingPathComponent("xl/_rels", isDirectory: true), withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: workingURL.appendingPathComponent("xl/worksheets", isDirectory: true), withIntermediateDirectories: true)
+
+        try writeText(contentTypesXML, to: workingURL.appendingPathComponent("[Content_Types].xml"))
+        try writeText(rootRelationshipsXML, to: workingURL.appendingPathComponent("_rels/.rels"))
+        try writeText(workbookXML, to: workingURL.appendingPathComponent("xl/workbook.xml"))
+        try writeText(workbookRelationshipsXML, to: workingURL.appendingPathComponent("xl/_rels/workbook.xml.rels"))
+        try writeText(simpleWorksheetXML(headers: headers, rows: rows), to: workingURL.appendingPathComponent("xl/worksheets/sheet1.xml"))
+
+        if FileManager.default.fileExists(atPath: outputURL.path) {
+            try FileManager.default.removeItem(at: outputURL)
+        }
+        try runZip(outputURL: outputURL, workingURL: workingURL)
+    }
+
     func write(templateURL: URL, outputURL: URL, headers: [String], rows: [TemplateRow]) throws {
         let archive = try XLSXArchive(sourceURL: templateURL, copyToTemporaryDirectory: true)
         let sheet = try archive.sheetPath(first: true)
@@ -92,5 +130,106 @@ final class ExcelWriter {
         inline.addChild(text)
         cell.addChild(inline)
         return cell
+    }
+
+    private func simpleWorksheetXML(headers: [String], rows: [[String]]) -> String {
+        let headerCells = headers.enumerated().map { columnIndex, value in
+            inlineStringCellXML(reference: "\(ExcelReader.columnLetters(for: columnIndex + 1))1", value: value)
+        }.joined()
+
+        let dataRows = rows.enumerated().map { rowOffset, values in
+            let rowIndex = rowOffset + 2
+            let cells = values.enumerated().map { columnIndex, value in
+                inlineStringCellXML(reference: "\(ExcelReader.columnLetters(for: columnIndex + 1))\(rowIndex)", value: value)
+            }.joined()
+            return """
+            <row r="\(rowIndex)">\(cells)</row>
+            """
+        }.joined()
+
+        return """
+        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+          <sheetData>
+            <row r="1">\(headerCells)</row>
+            \(dataRows)
+          </sheetData>
+        </worksheet>
+        """
+    }
+
+    private func inlineStringCellXML(reference: String, value: String) -> String {
+        """
+        <c r="\(xmlEscaped(reference))" t="inlineStr"><is><t xml:space="preserve">\(xmlEscaped(value))</t></is></c>
+        """
+    }
+
+    private func xmlEscaped(_ value: String) -> String {
+        value
+            .replacingOccurrences(of: "&", with: "&amp;")
+            .replacingOccurrences(of: "<", with: "&lt;")
+            .replacingOccurrences(of: ">", with: "&gt;")
+            .replacingOccurrences(of: "\"", with: "&quot;")
+            .replacingOccurrences(of: "'", with: "&apos;")
+    }
+
+    private func writeText(_ value: String, to url: URL) throws {
+        try value.data(using: .utf8)?.write(to: url)
+    }
+
+    private func runZip(outputURL: URL, workingURL: URL) throws {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/zip")
+        process.arguments = ["-qr", outputURL.path, "."]
+        process.currentDirectoryURL = workingURL
+        let errorPipe = Pipe()
+        process.standardError = errorPipe
+        try process.run()
+        process.waitUntilExit()
+        guard process.terminationStatus == 0 else {
+            let message = String(data: errorPipe.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? "Unknown zip error"
+            throw XLSXError.archiveFailed(message)
+        }
+    }
+
+    private var contentTypesXML: String {
+        """
+        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+          <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+          <Default Extension="xml" ContentType="application/xml"/>
+          <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+          <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+        </Types>
+        """
+    }
+
+    private var rootRelationshipsXML: String {
+        """
+        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+          <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+        </Relationships>
+        """
+    }
+
+    private var workbookXML: String {
+        """
+        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+          <sheets>
+            <sheet name="Sheet1" sheetId="1" r:id="rId1"/>
+          </sheets>
+        </workbook>
+        """
+    }
+
+    private var workbookRelationshipsXML: String {
+        """
+        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+          <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+        </Relationships>
+        """
     }
 }
