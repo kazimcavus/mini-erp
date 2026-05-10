@@ -20,7 +20,7 @@ struct EditProductView: View {
 
             CardContainer(padding: 18) {
                 VStack(alignment: .leading, spacing: 14) {
-                    field("STOKKODU", text: $product.stockCode)
+                    field("Stok kodu", text: $product.stockCode)
                     field("Ürün adı", text: $product.productName)
                     field("Renk (çıktı)", text: $product.color)
                     field("Bilgiler’de aranacak örnek renk", text: $product.sourceColorPhrase)

@@ -81,14 +81,14 @@ private enum ProductTableLayout {
 struct ProductTableHeader: View {
     var body: some View {
         HStack(spacing: ProductTableLayout.spacing) {
-            header("STOKKODU", width: ProductTableLayout.stock)
-            header("Ürün Adı", width: ProductTableLayout.name)
+            header("Stok kodu", width: ProductTableLayout.stock)
+            header("Ürün adı", width: ProductTableLayout.name)
             header("Renk", width: ProductTableLayout.color)
-            header("Kaynak", width: ProductTableLayout.source)
-            header("Önyazı", width: ProductTableLayout.intro)
-            header("Kategori Çıktısı", width: ProductTableLayout.category)
-            header("Breadcrumb", width: ProductTableLayout.breadcrumb)
-            header("Varyasyon Dosyası", width: ProductTableLayout.file)
+            header("Kaynak renk örneği", width: ProductTableLayout.source)
+            header("Önyazı tipi", width: ProductTableLayout.intro)
+            header("Kategori çıktısı", width: ProductTableLayout.category)
+            header("Kategori yolu", width: ProductTableLayout.breadcrumb)
+            header("Bilgiler dosyası", width: ProductTableLayout.file)
             header("İşlemler", width: ProductTableLayout.actions)
         }
         .padding(.horizontal, ProductTableLayout.horizontalPadding)
@@ -100,7 +100,6 @@ struct ProductTableHeader: View {
         Text(value)
             .font(.system(size: 11, weight: .semibold))
             .foregroundStyle(.secondary)
-            .textCase(.uppercase)
             .lineLimit(1)
             .frame(width: width, alignment: .leading)
     }

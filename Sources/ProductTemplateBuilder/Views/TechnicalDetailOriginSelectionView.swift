@@ -8,7 +8,7 @@ struct TechnicalDetailOriginSelectionView: View {
         VStack(spacing: 18) {
             ModalHeaderView(
                 title: "Menşei Seçimi",
-                subtitle: "Menşei teknik detayının ekleneceği STOKKODU satırlarını seç.",
+                subtitle: "Menşei teknik detayı eklenecek satırları stok kodlarına göre seçin.",
                 systemImage: "mappin.and.ellipse",
                 onClose: {
                     viewModel.technicalDetailDraft = nil
@@ -38,8 +38,8 @@ struct TechnicalDetailOriginSelectionView: View {
                             .labelsHidden()
                         }
                         .width(70)
-                        TableColumn("STOKKODU", value: \.stockCode)
-                        TableColumn("Ürün Kart ID", value: \.productCardID)
+                        TableColumn("Stok kodu", value: \.stockCode)
+                        TableColumn("Ürün kartı ID", value: \.productCardID)
                         TableColumn("Ürün Adı") { product in
                             Text(product.productName)
                                 .lineLimit(2)
@@ -86,7 +86,7 @@ struct TechnicalDetailOriginSelectionView: View {
     }
 
     private func missingSourceText(_ draft: TechnicalDetailDraft) -> some View {
-        Text("Kaynak listede bulunamayan STOKKODU: \(draft.missingSourceStockCodes.prefix(8).joined(separator: ", "))\(draft.missingSourceStockCodes.count > 8 ? " ..." : "")")
+        Text("Kaynak listede bulunamayan stok kodları: \(draft.missingSourceStockCodes.prefix(8).joined(separator: ", "))\(draft.missingSourceStockCodes.count > 8 ? " …" : "")")
             .font(.caption)
             .foregroundStyle(.secondary)
             .lineLimit(2)

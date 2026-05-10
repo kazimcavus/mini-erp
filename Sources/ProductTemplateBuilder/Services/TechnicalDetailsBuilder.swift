@@ -14,10 +14,10 @@ final class TechnicalDetailsBuilder {
     private let originValue = "Türkiye'de üretilmiştir."
 
     func products(from ticimaxTable: WorkbookTable, sourceTable: WorkbookTable) throws -> (products: [TechnicalDetailProductSelection], missingSourceStockCodes: [String]) {
-        let ticimaxStockHeader = try requiredHeader(["STOKKODU", "STOK KODU"], in: ticimaxTable.headers, label: "Ticimax STOKKODU")
-        let cardIDHeader = try requiredHeader(["URUNKARTIID", "URUN KART ID", "ÜRÜN KART ID"], in: ticimaxTable.headers, label: "Ticimax URUNKARTIID")
-        let productNameHeader = try requiredHeader(["URUNADI", "ÜRÜNADI", "URUN ADI", "ÜRÜN ADI"], in: ticimaxTable.headers, label: "Ticimax URUNADI")
-        let sourceStockHeader = try requiredHeader(["STOKKODU", "STOK KODU"], in: sourceTable.headers, label: "Ürünler STOKKODU")
+        let ticimaxStockHeader = try requiredHeader(["STOKKODU", "STOK KODU"], in: ticimaxTable.headers, label: "Ürün listesinde stok kodu")
+        let cardIDHeader = try requiredHeader(["URUNKARTIID", "URUN KART ID", "ÜRÜN KART ID"], in: ticimaxTable.headers, label: "Ürün listesinde ürün kartı kimliği")
+        let productNameHeader = try requiredHeader(["URUNADI", "ÜRÜNADI", "URUN ADI", "ÜRÜN ADI"], in: ticimaxTable.headers, label: "Ürün listesinde ürün adı")
+        let sourceStockHeader = try requiredHeader(["STOKKODU", "STOK KODU"], in: sourceTable.headers, label: "Ürünler listesinde stok kodu")
 
         let sourceStockCodes = Set(sourceTable.rows.map { normalizedStock($0[sourceStockHeader] ?? "") }.filter { !$0.isEmpty })
         var seen = Set<String>()
@@ -52,7 +52,7 @@ final class TechnicalDetailsBuilder {
         sourceTable: WorkbookTable,
         originStockCodes: Set<String>
     ) throws -> [TechnicalDetailRow] {
-        let sourceStockHeader = try requiredHeader(["STOKKODU", "STOK KODU"], in: sourceTable.headers, label: "Ürünler STOKKODU")
+        let sourceStockHeader = try requiredHeader(["STOKKODU", "STOK KODU"], in: sourceTable.headers, label: "Ürünler listesinde stok kodu")
         var sourceRowsByStock: [String: [String: String]] = [:]
         for row in sourceTable.rows {
             let stock = normalizedStock(row[sourceStockHeader] ?? "")

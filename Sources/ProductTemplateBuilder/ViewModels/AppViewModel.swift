@@ -50,6 +50,19 @@ final class AppViewModel: ObservableObject {
         if draftRows.isEmpty { draftRows.append(ProductDraftRow()) }
     }
 
+    /// İlk stok kutusuna Excel’den (iki yan yana sütun + çok satır) yapıştırıldığında satırları doldurur.
+    func applyTwoColumnSkuNamePaste(rows: [(String, String)]) {
+        guard !rows.isEmpty else { return }
+        while draftRows.count < rows.count {
+            draftRows.append(ProductDraftRow())
+        }
+        for i in rows.indices {
+            draftRows[i].stockCode = rows[i].0
+            draftRows[i].productName = rows[i].1
+        }
+        status = .success("\(rows.count) satır stok kodu ve ürün adı yapıştırıldı.")
+    }
+
     private func inferSourceColorPhrase(from url: URL) throws -> String {
         let table = try reader.readFirstSheet(from: url)
         for row in table.rows {
@@ -101,7 +114,7 @@ final class AppViewModel: ObservableObject {
         for row in validRows {
             guard !row.stockCode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
                   !row.productName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-                status = .warning("Her satırda STOKKODU ve ürün adı dolu olmalı.")
+                status = .warning("Her satırda stok kodu ve ürün adı dolu olmalı.")
                 return
             }
             guard !row.color.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
@@ -189,14 +202,14 @@ final class AppViewModel: ObservableObject {
     }
 
     func exportRelatedProductsTemplate() {
-        guard let sourceURL = FilePanelService.chooseXLSX(title: "Ticimax ürün listesini seç") else { return }
+        guard let sourceURL = FilePanelService.chooseXLSX(title: "Ürün listesi Excel dosyasını seç") else { return }
         guard let outputURL = FilePanelService.saveXLSX(defaultName: "urun-ilgili-urunler.xlsx") else { return }
 
         do {
             let table = try reader.readFirstSheet(from: sourceURL)
             let rows = try relatedProductsBuilder.makeRows(from: table)
             guard !rows.isEmpty else {
-                status = .warning("Aynı OZELALAN1 değerine göre ilgili ürün satırı bulunamadı.")
+                status = .warning("Aynı özel alan 1 değerine göre ilgili ürün satırı bulunamadı.")
                 return
             }
             try writer.writeRelatedProducts(outputURL: outputURL, rows: rows)
@@ -207,7 +220,7 @@ final class AppViewModel: ObservableObject {
     }
 
     func prepareTechnicalDetailsTemplate() {
-        guard let ticimaxURL = FilePanelService.chooseXLSX(title: "Ticimax ürün listesini seç") else { return }
+        guard let ticimaxURL = FilePanelService.chooseXLSX(title: "Ürün listesi Excel dosyasını seç") else { return }
         guard let sourceURL = FilePanelService.chooseXLSX(title: "Ürünler.xlsx teknik detay kaynak listesini seç") else { return }
 
         do {
@@ -215,7 +228,7 @@ final class AppViewModel: ObservableObject {
             let sourceTable = try reader.readFirstSheet(from: sourceURL)
             let prepared = try technicalDetailsBuilder.products(from: ticimaxTable, sourceTable: sourceTable)
             guard !prepared.products.isEmpty else {
-                status = .warning("STOKKODU eşleşmesi bulunan ürün bulunamadı.")
+                status = .warning("Stok kodu eşleşmesi bulunan ürün bulunamadı.")
                 return
             }
             technicalDetailDraft = TechnicalDetailDraft(
@@ -225,7 +238,7 @@ final class AppViewModel: ObservableObject {
                 selectedOriginStockCodes: Set(prepared.products.map(\.stockCode)),
                 missingSourceStockCodes: prepared.missingSourceStockCodes
             )
-            let missingMessage = prepared.missingSourceStockCodes.isEmpty ? "" : " \(prepared.missingSourceStockCodes.count) STOKKODU kaynak listede bulunamadı."
+            let missingMessage = prepared.missingSourceStockCodes.isEmpty ? "" : " \(prepared.missingSourceStockCodes.count) stok kodu kaynak listede bulunamadı."
             status = .success("\(prepared.products.count) ürün Menşei seçimi için hazır.\(missingMessage)")
         } catch {
             status = .failure(error.localizedDescription)

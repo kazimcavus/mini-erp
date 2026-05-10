@@ -203,16 +203,16 @@ struct SidebarExcelToolsView: View {
                 VStack(spacing: 8) {
                     toolRow(
                         title: "İlgili Ürünler",
-                        subtitle: "Ticimax ürün listesi → ilişkilendirilmiş Excel",
+                        subtitle: "Ürün listesi Excel’i → ilişkilendirilmiş Excel",
                         systemImage: "link",
-                        help: "Kaynak Excel’den OZELALAN1’a göre ilgili ürün satırları üretir."
+                        help: "Kaynak Excel’deki özel alan 1 (OZELALAN1) değerine göre ilgili ürün satırları üretir."
                     ) {
                         viewModel.exportRelatedProductsTemplate()
                     }
 
                     toolRow(
                         title: "Teknik Detaylar",
-                        subtitle: "Ticimax liste + Ürünler kaynağı→ şablon",
+                        subtitle: "Ürün listesi + Ürünler kaynağı → şablon",
                         systemImage: "list.clipboard",
                         help: "İki Excel seçilir; Menşei seçimi penceresi açılır, ardından dışa aktarım yapılır."
                     ) {
@@ -221,7 +221,7 @@ struct SidebarExcelToolsView: View {
 
                     toolRow(
                         title: "Çekim klasörleri",
-                        subtitle: "Bilgiler.xlsx → Fiyatlar + Varyasyon",
+                        subtitle: "Bilgiler → fiyat ve varyasyon sütunları",
                         systemImage: "camera.fill",
                         help: "Ana klasör seçilir; alt klasörlerdeki Bilgiler dosyasından formülsüz, klasör adlı .xlsx üretilir."
                     ) {

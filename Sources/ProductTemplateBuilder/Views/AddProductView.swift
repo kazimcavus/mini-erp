@@ -32,34 +32,21 @@ struct AddProductView: View {
                 Text("Renk sütunu çıktı tonu olarak yazılır. Bilgiler’deki örnek renk otomatik bulunup bu değerle değiştirilir.")
                     .font(.system(size: 12))
                     .foregroundStyle(.secondary)
+                Text("Excel’de iki yan yana sütun (stok kodu ve ürün adı) seçip kopyalayın; ilk stok kutusuna yapıştırınca tüm satırlar dolar.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
 
-                Grid(alignment: .leading, horizontalSpacing: 10, verticalSpacing: 9) {
-                    GridRow {
-                        header("STOKKODU")
-                        header("Ürün Adı")
-                        header("Renk")
-                        Text("").frame(width: 30)
-                    }
-                    ForEach($viewModel.draftRows) { $row in
-                        GridRow {
-                            TextField("", text: $row.stockCode)
-                                .textFieldStyle(RoundedInputStyle())
-                            TextField("", text: $row.productName)
-                                .textFieldStyle(RoundedInputStyle())
-                            TextField("", text: $row.color)
-                                .textFieldStyle(RoundedInputStyle())
-                            Button {
-                                viewModel.removeDraftRow(row)
-                            } label: {
-                                Image(systemName: "minus.circle.fill")
-                                    .foregroundStyle(.red.opacity(0.8))
-                                    .frame(width: 28, height: 28)
-                            }
-                            .buttonStyle(.borderless)
-                            .help("Satırı kaldır")
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 9) {
+                        columnHeaderRow
+                        ForEach($viewModel.draftRows) { $row in
+                            let rowId = $row.wrappedValue.id
+                            draftGridRow(binding: $row, isFirstStockRow: rowId == viewModel.draftRows.first?.id)
                         }
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
+                .scrollIndicators(.visible)
 
                 Button {
                     viewModel.addDraftRow()
@@ -69,7 +56,55 @@ struct AddProductView: View {
                 .buttonStyle(MacButtonStyle(kind: .secondary))
             }
         }
-        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    private var columnHeaderRow: some View {
+        HStack(spacing: 10) {
+            header("Stok kodu")
+                .frame(minWidth: 120, maxWidth: .infinity, alignment: .leading)
+            header("Ürün adı")
+                .frame(minWidth: 140, maxWidth: .infinity, alignment: .leading)
+            header("Renk (çıktı)")
+                .frame(minWidth: 88, maxWidth: .infinity, alignment: .leading)
+            Text("")
+                .frame(width: 30)
+        }
+    }
+
+    @ViewBuilder
+    private func draftGridRow(binding: Binding<ProductDraftRow>, isFirstStockRow: Bool) -> some View {
+        HStack(alignment: .center, spacing: 10) {
+            Group {
+                if isFirstStockRow {
+                    StockCodePasteTextField(
+                        text: binding.stockCode,
+                        onTwoColumnPaste: { pairs in viewModel.applyTwoColumnSkuNamePaste(rows: pairs) }
+                    )
+                    .frame(height: 38)
+                    .frame(minWidth: 120, maxWidth: .infinity, alignment: .leading)
+                } else {
+                    TextField("", text: binding.stockCode)
+                        .textFieldStyle(RoundedInputStyle())
+                        .frame(minWidth: 120, maxWidth: .infinity, alignment: .leading)
+                }
+            }
+            TextField("", text: binding.productName)
+                .textFieldStyle(RoundedInputStyle())
+                .frame(minWidth: 140, maxWidth: .infinity, alignment: .leading)
+            TextField("", text: binding.color)
+                .textFieldStyle(RoundedInputStyle())
+                .frame(minWidth: 88, maxWidth: .infinity, alignment: .leading)
+            Button {
+                viewModel.removeDraftRow(binding.wrappedValue)
+            } label: {
+                Image(systemName: "minus.circle.fill")
+                    .foregroundStyle(.red.opacity(0.8))
+                    .frame(width: 28, height: 28)
+            }
+            .buttonStyle(.borderless)
+            .help("Satırı kaldır")
+        }
     }
 
     private var settingsPanel: some View {
@@ -84,7 +119,7 @@ struct AddProductView: View {
                         }
                     }
 
-                    Picker("SATISFIYATI", selection: $viewModel.selectedStrikeThroughPreset) {
+                    Picker("Liste fiyatı hesabı", selection: $viewModel.selectedStrikeThroughPreset) {
                         ForEach(StrikeThroughDiscountPreset.allCases) { preset in
                             Text(preset.label).tag(preset)
                         }
@@ -112,17 +147,18 @@ struct AddProductView: View {
             }
         }
         .frame(width: 430, alignment: .topLeading)
+        .frame(maxHeight: .infinity, alignment: .topLeading)
     }
 
     private var selectedCategorySummary: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Seçilen Breadcrumb")
+            Text("Kategori yolu (breadcrumb)")
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(.secondary)
             Text(viewModel.selectedBreadcrumb.isEmpty ? "-" : viewModel.selectedBreadcrumb)
                 .font(.system(size: 13, weight: .medium))
                 .lineLimit(2)
-            Text("Excel KATEGORILER çıktısı")
+            Text("Excel’daki kategori sütunu (KATEGORILER)")
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(.secondary)
                 .padding(.top, 2)
@@ -203,6 +239,5 @@ struct AddProductView: View {
         Text(value)
             .font(.system(size: 11, weight: .semibold))
             .foregroundStyle(.secondary)
-            .textCase(.uppercase)
     }
 }
