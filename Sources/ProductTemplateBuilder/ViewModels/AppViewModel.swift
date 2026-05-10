@@ -280,6 +280,21 @@ final class AppViewModel: ObservableObject {
         technicalDetailDraft = draft
     }
 
+    /// Çekim kök klasöründeki tüm görselleri masaüstünde `DDMMYYYY-Fotograflar` içine kopyalar.
+    func exportShootFolderPhotosToDesktop() {
+        guard let root = FilePanelService.chooseFolder(title: "Görsellerin bulunduğu kök klasörü seçin") else { return }
+        do {
+            let result = try ShootPhotoExporter.copyAllImages(from: root)
+            if result.copiedCount == 0 {
+                status = .warning("Bu klasörde desteklenen görsel dosyası bulunamadı.")
+            } else {
+                status = .success("\(result.copiedCount) görsel masaüstüne kopyalandı: \(result.destinationFolder.path)")
+            }
+        } catch {
+            status = .failure(error.localizedDescription)
+        }
+    }
+
     /// Foto çekimi gibi yapılarda ana klasörü seçip alt klasörlerdeki `Bilgiler.xlsx` dosyalarını
     /// `{klasörAdı}.xlsx` olarak yeniden yazar (yalnız Fiyatlar + Varyasyon, formülsüz).
     func batchNormalizeBilgilerFolders() {

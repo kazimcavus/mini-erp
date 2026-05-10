@@ -227,6 +227,15 @@ struct SidebarExcelToolsView: View {
                     ) {
                         viewModel.batchNormalizeBilgilerFolders()
                     }
+
+                    toolRow(
+                        title: "Çekim fotoğrafları",
+                        subtitle: "Kök klasördeki tüm görseller → Masaüstü",
+                        systemImage: "photo.on.rectangle.angled",
+                        help: "Seçilen klasör ve alt klasörlerdeki görseller, masaüstünde bugünün tarihiyle DDMMYYYY-Fotograflar klasörüne kopyalanır."
+                    ) {
+                        viewModel.exportShootFolderPhotosToDesktop()
+                    }
                 }
             }
         }
