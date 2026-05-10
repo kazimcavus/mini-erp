@@ -5,7 +5,7 @@ final class TechnicalDetailsBuilder {
         ("Taban", ["Taban"]),
         ("Üretim Şekli", ["Üretim Şekli", "Uretim Sekli", "ÜretimSekli"]),
         ("Şekil", ["Şekil", "Sekil"]),
-        ("Materyal", ["Materyal", "Malzeme"]),
+        ("Materyal", ["Materyal", "Mataryal", "Metaryal", "Material", "Malzeme"]),
         ("Hav Yüksekliği", ["Hav Yüksekliği", "Hav Yuksekligi", "Hav Yüksekliği (mm)", "Hav"]),
         ("Saçak Tipi", ["Saçak Tipi", "Sacak Tipi", "Saçak", "Sacak"]),
     ]
