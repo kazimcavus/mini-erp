@@ -1,0 +1,449 @@
+<style type="text/css">.cag-info-row{
+
+    display:flex;
+
+    gap:10px;
+
+    margin-top:16px;
+
+    margin-bottom:8px;
+
+    font-family:"Inter",sans-serif;
+
+}
+
+.cag-info-item{
+
+    flex:1 1 0;
+
+    border:1px solid #e5e5e5;
+
+    border-radius:8px;
+
+    padding:10px 12px;
+
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:8px;
+
+}
+
+/* hafif renkli arka planlar */
+
+.cag-info-item.kargo{
+
+    background:#f2fbf5;
+
+    border-color:#d5f0dc;
+
+}
+
+.cag-info-item.taksit{
+
+    background:#f2f7ff;
+
+    border-color:#d7e3ff;
+
+}
+
+.cag-info-item.indirim{
+
+    background:#fff7ef;
+
+    border-color:#ffe1c4;
+
+}
+
+.cag-info-icon{
+
+    width:26px;
+
+    height:26px;
+
+    flex:0 0 26px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+}
+
+.cag-info-icon img{
+
+    width:22px;
+
+    height:22px;
+
+    display:block;
+
+}
+
+.cag-info-text{
+
+    line-height:1.25;
+
+}
+
+.cag-info-title{
+
+    font-size:13px;
+
+    font-weight:600;
+
+    color:#111;
+
+    margin-bottom:2px;
+
+}
+
+.cag-info-desc{
+
+    font-size:12px;
+
+    color:#555;
+
+}
+
+
+
+@media (max-width:600px){
+
+    .cag-info-row{
+
+        flex-direction:column;
+
+    }
+
+}
+
+
+
+/* Özel ölçü kutusu */
+
+.cag-ozel-box{
+
+    border:1px solid #e5e5e5;
+
+    background:#fafafa;
+
+    border-radius:8px;
+
+    padding:12px 14px;
+
+    font-family:"Inter",sans-serif;
+
+    line-height:1.4;
+
+    margin-top:8px;
+
+}
+
+.cag-ozel-head{
+
+    font-size:14px;
+
+    font-weight:600;
+
+    color:#111;
+
+    margin:0 0 8px 0;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:6px;
+
+}
+
+.cag-ozel-head-icon{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    width:16px; height:16px;
+
+}
+
+.cag-ozel-head-icon img{
+
+    width:16px; height:16px; display:block;
+
+}
+
+.cag-ozel-text{
+
+    font-size:13px;
+
+    color:#444;
+
+    margin:0 0 10px 0;
+
+    line-height:1.5;
+
+}
+
+.cag-ozel-actions{
+
+    display:grid;
+
+    grid-template-columns:repeat(2, minmax(0,1fr));
+
+    gap:8px;
+
+}
+
+.cag-btn{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:8px;
+
+    border-radius:6px;
+
+    font-size:13px;
+
+    font-weight:600;
+
+    padding:9px 10px;
+
+    text-align:center;
+
+    border:1px solid transparent;
+
+    white-space:normal;
+
+    word-break:break-word;
+
+}
+
+.cag-btn-primary{ background:#000; color:#fff; border-color:#000; }
+
+.cag-btn-outline{ background:#fff; color:#000; border-color:#000; }
+
+
+
+/* Ortak hover rengi - daha koyu gri */
+
+.cag-btn-primary:hover,
+
+.cag-btn-outline:hover{
+
+    background:#d6d6d6;
+
+    border-color:#d6d6d6;
+
+    color:#000;
+
+    opacity:1;
+
+}
+
+
+
+/* WhatsApp ikonu span'i */
+
+.cag-btn-icon-whatsapp{
+
+    width:16px;
+
+    height:16px;
+
+    display:inline-block;
+
+    background-image:url("https://static.ticimax.cloud/72848/uploads/images/web-images-for-pages/whatsapp-white.svg") !important;
+
+    background-position:center;
+
+    background-repeat:no-repeat;
+
+    background-size:16px 16px;
+
+}
+
+
+
+@media (max-width:480px){
+
+    .cag-ozel-actions{ gap:6px; }
+
+}
+
+</style>
+
+<!-- BİLGİ KUTULARI -->
+
+<div class="cag-info-row">
+
+<div class="cag-info-item kargo">
+
+<div class="cag-info-icon"><img alt="Ücretsiz kargo" src="https://static.ticimax.cloud/72848/uploads/images/web-images-for-pages/delivery-truck-speed-icon.svg" /></div>
+
+
+
+<div class="cag-info-text">
+
+<div class="cag-info-title">Ücretsiz Kargo</div>
+
+
+
+<div class="cag-info-desc">Tüm ürünlerde geçerlidir.</div>
+
+</div>
+
+</div>
+
+
+
+<div class="cag-info-item taksit">
+
+<div class="cag-info-icon"><img alt="Taksit" src="https://static.ticimax.cloud/72848/uploads/images/web-images-for-pages/wallet-icon.svg" /></div>
+
+
+
+<div class="cag-info-text">
+
+<div class="cag-info-title">Peşin Fiyatına 3 Taksit</div>
+
+
+
+<div class="cag-info-desc">Anlaşmalı kartlara.</div>
+
+</div>
+
+</div>
+
+
+
+<div class="cag-info-item indirim">
+
+<div class="cag-info-icon"><img alt="İndirim" src="https://static.ticimax.cloud/72848/uploads/images/web-images-for-pages/percent-discount-icon.svg" /></div>
+
+
+
+<div class="cag-info-text">
+
+<div class="cag-info-title">İlk Alışverişine %10 İndirim</div>
+
+
+
+<div class="cag-info-desc">Üye ol, sepette indirim kazan!</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ÖZEL ÖLÇÜ BLOĞU -->
+
+
+
+<div class="cag-ozel-box">
+
+<div class="cag-ozel-head"><span class="cag-ozel-head-icon"> <img alt="Özel kesim" src="https://static.ticimax.cloud/72848/uploads/images/web-images-for-pages/cut.svg" /> </span> <span>Özel Ölçü Sipariş</span></div>
+
+
+
+<p class="cag-ozel-text">Bazı modeller yalnızca standart ölçülerdedir. Uygun serilerimizde ise halınızı istediğiniz ebatta hazırlayabiliyoruz.</p>
+
+
+
+<p class="cag-ozel-text" style="margin-top:-6px;">Özel ölçü talebiniz varsa aşağıdaki bağlantıları kullanarak bizimle iletişime geçebilirsiniz.</p>
+
+
+
+<p class="cag-ozel-text" style="margin-top:-6px;">Bu ürünler size özel hazırlandığı için iade kabul edilmez.</p>
+
+
+
+<div class="cag-ozel-actions"><a class="cag-btn cag-btn-outline" href="/hali-olcu-alma-rehberi"><span class="cag-btn-icon"> <img alt="Ölçü alma" src="https://static.ticimax.cloud/72848/uploads/images/web-images-for-pages/ruler.svg" style="width:14px;height:14px;display:block;" /> </span> <span>Ölçü Alma Rehberi</span> </a> <a class="cag-btn cag-btn-primary" href="https://wa.me/905424827186" id="cag-wa-btn" rel="noopener noreferrer" target="_blank"> <span aria-hidden="true" class="cag-btn-icon-whatsapp"></span> <span>Özel Ölçü İçin Bize Ulaşın</span> </a></div>
+
+</div>
+
+<script>
+
+(function() {
+
+  var rawName = '';
+
+  var elName = document.querySelector(
+
+    '.ProductDetailMain .RightDetail h1, #ProductDetailMain h1, .urunDetayBaslik, .product-title, h1[itemprop="name"]'
+
+  );
+
+  if (elName && elName.textContent.trim()) {
+
+    rawName = elName.textContent.trim();
+
+  } else {
+
+    rawName = 'ürün';
+
+  }
+
+
+
+  var beforePipe = rawName.split('|')[0].trim();
+
+
+
+  var productTitle = beforePipe;
+
+  var sku = '';
+
+  var dashIndex = beforePipe.lastIndexOf(' - ');
+
+  if (dashIndex !== -1) {
+
+    productTitle = beforePipe.substring(0, dashIndex).trim();
+
+    sku = beforePipe.substring(dashIndex + 3).trim();
+
+  }
+
+
+
+  productTitle = productTitle.replace(/\s+/g, ' ').trim();
+
+
+
+  var pageUrl = window.location.href;
+
+
+
+  var msg = 'Merhaba, "' + productTitle + '"';
+
+  if (sku) {
+
+    msg += ' (' + sku + ')';
+
+  }
+
+  msg += ' ile ilgili bilgi almak istiyorum.\n\nÜrün linki: ' + pageUrl;
+
+
+
+  var waBtn = document.getElementById('cag-wa-btn');
+
+  if (waBtn) {
+
+    waBtn.href = 'https://wa.me/905424827186?text=' + encodeURIComponent(msg);
+
+  }
+
+})();
+
+</script>

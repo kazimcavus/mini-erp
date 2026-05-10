@@ -84,6 +84,8 @@ struct CategoryTreePickerView: View {
                 }
             }
         }
+        /// SKU ızgarasından Tab ile bu bloka gelinmesin; seçim fare ile.
+        .focusable(false)
     }
 
     /// Ağacı süzer: ada, breadcrumb veya Excel kategori metnine göre; eşleşen dalların üst klasörleri tutulur.

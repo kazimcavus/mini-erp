@@ -25,7 +25,7 @@ final class CategoryAnalyzer {
     }
 
     private func introTypes(from table: WorkbookTable?) -> [IntroType: String] {
-        var result: [IntroType: String] = [.tip1: "Tip 1", .tip2: "Tip 2", .tip3: "Tip 3"]
+        var result: [IntroType: String] = Dictionary(uniqueKeysWithValues: EmbeddedCatalog.introTemplates.map { ($0.id, $0.label) })
         guard let table else { return result }
         for type in IntroType.allCases {
             if let header = table.headers.first(where: { ExcelHeaderNormalizer.matches($0, type.rawValue) || ExcelHeaderNormalizer.matches($0, type.rawValue.replacingOccurrences(of: " ", with: "")) }),

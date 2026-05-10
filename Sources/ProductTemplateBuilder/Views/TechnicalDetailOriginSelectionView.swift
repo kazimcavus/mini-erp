@@ -4,23 +4,31 @@ struct TechnicalDetailOriginSelectionView: View {
     @EnvironmentObject private var viewModel: AppViewModel
     @Environment(\.dismiss) private var dismiss
 
-    var body: some View {
-        VStack(spacing: 18) {
-            ModalHeaderView(
-                title: "Menşei Seçimi",
-                subtitle: "Menşei teknik detayı eklenecek satırları stok kodlarına göre seçin.",
-                systemImage: "mappin.and.ellipse",
-                onClose: {
-                    viewModel.technicalDetailDraft = nil
-                    dismiss()
-                }
-            )
+    private static let chromeHeightEstimate: CGFloat = 290
 
-            content
-            footer
+    var body: some View {
+        GeometryReader { geo in
+            VStack(spacing: 18) {
+                ModalHeaderView(
+                    title: "Menşei Seçimi",
+                    subtitle: "Menşei teknik detayı eklenecek satırları stok kodlarına göre seçin.",
+                    systemImage: "mappin.and.ellipse",
+                    onClose: {
+                        viewModel.technicalDetailDraft = nil
+                        dismiss()
+                    }
+                )
+
+                content
+                    .frame(height: max(220, geo.size.height - Self.chromeHeightEstimate))
+                    .clipped()
+
+                footer
+            }
+            .padding(22)
+            .frame(width: geo.size.width, height: geo.size.height, alignment: .top)
+            .background(AppTheme.windowBackground)
         }
-        .padding(22)
-        .background(AppTheme.windowBackground)
     }
 
     private var content: some View {

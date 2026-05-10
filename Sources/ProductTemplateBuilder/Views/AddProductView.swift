@@ -3,6 +3,7 @@ import SwiftUI
 struct AddProductView: View {
     @EnvironmentObject private var viewModel: AppViewModel
     @Environment(\.dismiss) private var dismiss
+    @FocusState private var skuFocus: AddProductSKUFocus?
 
     var body: some View {
         VStack(spacing: 18) {
@@ -28,7 +29,17 @@ struct AddProductView: View {
     private var inputTable: some View {
         CardContainer(padding: 18) {
             VStack(alignment: .leading, spacing: 14) {
-                sectionTitle("SKU satırları", systemImage: "square.grid.2x2")
+                HStack(alignment: .center, spacing: 12) {
+                    sectionTitle("SKU satırları", systemImage: "square.grid.2x2")
+                    Spacer(minLength: 8)
+                    Text("\(viewModel.draftRows.count) satır")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(AppTheme.accentSoft, in: Capsule())
+                }
                 Text("Renk sütunu çıktı tonu olarak yazılır. Bilgiler’deki örnek renk otomatik bulunup bu değerle değiştirilir.")
                     .font(.system(size: 12))
                     .foregroundStyle(.secondary)
@@ -36,17 +47,30 @@ struct AddProductView: View {
                     .font(.system(size: 12))
                     .foregroundStyle(.secondary)
 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 9) {
-                        columnHeaderRow
-                        ForEach($viewModel.draftRows) { $row in
-                            let rowId = $row.wrappedValue.id
-                            draftGridRow(binding: $row, isFirstStockRow: rowId == viewModel.draftRows.first?.id)
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 9) {
+                            columnHeaderRow
+                            ForEach($viewModel.draftRows) { $row in
+                                let rowId = $row.wrappedValue.id
+                                draftGridRow(binding: $row, isFirstStockRow: rowId == viewModel.draftRows.first?.id)
+                                    .id(rowId)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        /// Dikey scrollbar üst üste gelmesin: sil düğmesi sütununun sağında boşluk bırak.
+                        .padding(.trailing, 26)
+                    }
+                    .scrollIndicators(.visible)
+                    .onChange(of: skuFocus?.rowId) { rowId in
+                        guard let rowId else { return }
+                        DispatchQueue.main.async {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                proxy.scrollTo(rowId, anchor: UnitPoint(x: 0.5, y: 0.42))
+                            }
                         }
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .scrollIndicators(.visible)
 
                 Button {
                     viewModel.addDraftRow()
@@ -65,10 +89,10 @@ struct AddProductView: View {
                 .frame(minWidth: 120, maxWidth: .infinity, alignment: .leading)
             header("Ürün adı")
                 .frame(minWidth: 140, maxWidth: .infinity, alignment: .leading)
-            header("Renk (çıktı)")
+            header("Renk")
                 .frame(minWidth: 88, maxWidth: .infinity, alignment: .leading)
             Text("")
-                .frame(width: 30)
+                .frame(width: 34)
         }
     }
 
@@ -79,21 +103,32 @@ struct AddProductView: View {
                 if isFirstStockRow {
                     StockCodePasteTextField(
                         text: binding.stockCode,
-                        onTwoColumnPaste: { pairs in viewModel.applyTwoColumnSkuNamePaste(rows: pairs) }
+                        onTwoColumnPaste: { pairs in viewModel.applyTwoColumnSkuNamePaste(rows: pairs) },
+                        syncedSkuFocus: $skuFocus,
+                        skuFocusSlot: AddProductSKUFocus(rowId: binding.wrappedValue.id, field: .stock)
                     )
                     .frame(height: 38)
                     .frame(minWidth: 120, maxWidth: .infinity, alignment: .leading)
                 } else {
                     TextField("", text: binding.stockCode)
                         .textFieldStyle(RoundedInputStyle())
+                        .focused($skuFocus, equals: AddProductSKUFocus(rowId: binding.wrappedValue.id, field: .stock))
                         .frame(minWidth: 120, maxWidth: .infinity, alignment: .leading)
                 }
             }
-            TextField("", text: binding.productName)
+            TextField(
+                "",
+                text: Binding(
+                    get: { binding.productName.wrappedValue },
+                    set: { viewModel.syncDraftRowProductName(rowId: binding.wrappedValue.id, name: $0) }
+                )
+            )
                 .textFieldStyle(RoundedInputStyle())
+                .focused($skuFocus, equals: AddProductSKUFocus(rowId: binding.wrappedValue.id, field: .name))
                 .frame(minWidth: 140, maxWidth: .infinity, alignment: .leading)
             TextField("", text: binding.color)
                 .textFieldStyle(RoundedInputStyle())
+                .focused($skuFocus, equals: AddProductSKUFocus(rowId: binding.wrappedValue.id, field: .color))
                 .frame(minWidth: 88, maxWidth: .infinity, alignment: .leading)
             Button {
                 viewModel.removeDraftRow(binding.wrappedValue)
@@ -103,7 +138,10 @@ struct AddProductView: View {
                     .frame(width: 28, height: 28)
             }
             .buttonStyle(.borderless)
+            .focusable(false)
             .help("Satırı kaldır")
+            /// Sabit kolon genişliği: scrollbar ile hizayı kaydırmayı azaltır.
+            .frame(width: 34, alignment: .trailing)
         }
     }
 
@@ -143,8 +181,11 @@ struct AddProductView: View {
                     selectedCategorySummary
                     variationFilePicker
                 }
-                .padding(1)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                /// Dikey scrollbar’ın listeyle çakışmaması için (sol SKU ile aynı boşluk).
+                .padding(.trailing, 26)
             }
+            .scrollIndicators(.visible)
         }
         .frame(width: 430, alignment: .topLeading)
         .frame(maxHeight: .infinity, alignment: .topLeading)

@@ -57,6 +57,8 @@ struct StockCodePasteTextField: NSViewRepresentable {
 
     @Binding var text: String
     var onTwoColumnPaste: ([(String, String)]) -> Void
+    var syncedSkuFocus: FocusState<AddProductSKUFocus?>.Binding
+    var skuFocusSlot: AddProductSKUFocus
 
     final class Coordinator: NSObject, NSTextViewDelegate {
         var parent: StockCodePasteTextField
@@ -68,6 +70,10 @@ struct StockCodePasteTextField: NSViewRepresentable {
         func textDidChange(_ notification: Notification) {
             guard let tv = notification.object as? NSTextView else { return }
             parent.text = tv.string
+        }
+
+        func textDidBeginEditing(_ notification: Notification) {
+            parent.syncedSkuFocus.wrappedValue = parent.skuFocusSlot
         }
     }
 
@@ -93,6 +99,7 @@ struct StockCodePasteTextField: NSViewRepresentable {
         tv.autoresizingMask = [.width, .maxYMargin]
         tv.string = text
         tv.focusRingType = .default
+        tv.insertionPointColor = .labelColor
 
         tv.wantsLayer = true
         tv.layer?.cornerCurve = .continuous

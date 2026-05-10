@@ -13,7 +13,15 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "ProductTemplateBuilder",
-            path: "Sources/ProductTemplateBuilder"
+            path: "Sources/ProductTemplateBuilder",
+            resources: [
+                .copy("Resources/UrunYuklemeSablonu.xlsx"),
+                .copy("Resources/Tip1Onyazi.html"),
+                .copy("Resources/Tip2Onyazi.html"),
+                .copy("Resources/Tip3Onyazi.html"),
+                .copy("Resources/Tip4Onyazi.html"),
+                .copy("Resources/Tip5Onyazi.html"),
+            ]
         )
     ]
 )

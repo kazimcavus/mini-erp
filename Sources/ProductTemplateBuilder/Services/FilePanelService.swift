@@ -23,10 +23,13 @@ enum FilePanelService {
     }
 
     @MainActor
-    static func saveXLSX(defaultName: String) -> URL? {
+    static func saveXLSX(defaultName: String, title: String? = nil, message: String? = nil) -> URL? {
         let panel = NSSavePanel()
+        if let title { panel.title = title }
+        if let message { panel.message = message }
         panel.allowedContentTypes = [.init(filenameExtension: "xlsx")!]
         panel.nameFieldStringValue = defaultName
+        panel.canCreateDirectories = true
         return panel.runModal() == .OK ? panel.url : nil
     }
 }

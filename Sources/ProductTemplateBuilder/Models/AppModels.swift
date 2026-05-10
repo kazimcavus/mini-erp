@@ -17,6 +17,25 @@ struct ProductDraftRow: Identifiable, Equatable {
     }
 }
 
+/// Ürün adının başından renk tahmini: ilk boşlukla ayrılan parça; “Beyaz - Siyah” gibi ara tireler `Beyaz-Siyah` olur.
+enum ProductNameColorInference {
+    static func inferredColor(fromProductName raw: String) -> String {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return "" }
+
+        let parts = trimmed.split { $0.isWhitespace }.map(String.init).filter { !$0.isEmpty }
+        guard let first = parts.first else { return "" }
+        guard parts.count >= 3, isJoiningHyphen(parts[1]) else { return first }
+        let third = parts[2]
+        guard !third.isEmpty else { return first }
+        return "\(first)-\(third)"
+    }
+
+    private static func isJoiningHyphen(_ s: String) -> Bool {
+        s == "-" || s == "–" || s == "—"
+    }
+}
+
 struct ProductEntry: Identifiable, Equatable {
     let id: UUID
     var stockCode: String
@@ -74,6 +93,8 @@ enum IntroType: String, CaseIterable, Identifiable {
     case tip1 = "Tip 1"
     case tip2 = "Tip 2"
     case tip3 = "Tip 3"
+    case tip4 = "Tip 4"
+    case tip5 = "Tip 5"
 
     var id: String { rawValue }
 }
@@ -81,10 +102,6 @@ enum IntroType: String, CaseIterable, Identifiable {
 struct CategoryOption: Identifiable, Hashable {
     var id: String { value }
     let value: String
-}
-
-enum AppDefaults {
-    static let mainTemplateURL = URL(fileURLWithPath: "/Users/kazimcavus/Downloads/2501-Urun-Yukleme-Sablon-1-Son.xlsx")
 }
 
 struct VariationRow: Equatable {

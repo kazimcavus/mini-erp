@@ -50,6 +50,13 @@ final class AppViewModel: ObservableObject {
         if draftRows.isEmpty { draftRows.append(ProductDraftRow()) }
     }
 
+    /// Ürün adı yazılıp/yapıştırılınca renk alanı adın başından türetilir (kullanıcı sonra düzeltebilir).
+    func syncDraftRowProductName(rowId: UUID, name: String) {
+        guard let i = draftRows.firstIndex(where: { $0.id == rowId }) else { return }
+        draftRows[i].productName = name
+        draftRows[i].color = ProductNameColorInference.inferredColor(fromProductName: name)
+    }
+
     /// İlk stok kutusuna Excel’den (iki yan yana sütun + çok satır) yapıştırıldığında satırları doldurur.
     func applyTwoColumnSkuNamePaste(rows: [(String, String)]) {
         guard !rows.isEmpty else { return }
@@ -58,7 +65,7 @@ final class AppViewModel: ObservableObject {
         }
         for i in rows.indices {
             draftRows[i].stockCode = rows[i].0
-            draftRows[i].productName = rows[i].1
+            syncDraftRowProductName(rowId: draftRows[i].id, name: rows[i].1)
         }
         status = .success("\(rows.count) satır stok kodu ve ürün adı yapıştırıldı.")
     }
@@ -168,16 +175,22 @@ final class AppViewModel: ObservableObject {
     }
 
     func exportTemplate() {
-        let templateURL = AppDefaults.mainTemplateURL
-        guard FileManager.default.fileExists(atPath: templateURL.path) else {
-            status = .warning("Ana şablon dosyası bulunamadı: \(templateURL.path)")
+        let templateURL: URL
+        do {
+            templateURL = try ProductUploadTemplateLocator.bundledTemplateURL()
+        } catch {
+            status = .failure(error.localizedDescription)
             return
         }
         guard !products.isEmpty else {
             status = .warning("Aktarım için önce en az bir ürün ekle.")
             return
         }
-        guard let outputURL = FilePanelService.saveXLSX(defaultName: "urun-yukleme-template.xlsx") else { return }
+        guard let outputURL = FilePanelService.saveXLSX(
+            defaultName: "urun-yukleme-template.xlsx",
+            title: "Excel şablonunu kaydet",
+            message: "Kayıt konumunu ve dosya adını seçin. Şablon gömülü kopyadan üretilir; başlık satırı sabittir."
+        ) else { return }
 
         do {
             let headers = try reader.readHeaders(fromTemplate: templateURL)

@@ -33,12 +33,13 @@ struct AppShellView: View {
         .sheet(item: $viewModel.editingProduct) { product in
             EditProductView(product: product)
                 .environmentObject(viewModel)
-                .frame(width: 620, height: 420)
+                /// Sabit küçük yükseklik formu kesiyordu; min boyut + Edit içi ScrollView alt butonları gösterir.
+                .frame(minWidth: 640, idealWidth: 680, minHeight: 620, idealHeight: 680)
         }
         .sheet(item: $viewModel.technicalDetailDraft) { _ in
             TechnicalDetailOriginSelectionView()
                 .environmentObject(viewModel)
-                .frame(minWidth: 760, minHeight: 620)
+                .frame(minWidth: 760, idealWidth: 880, minHeight: 620, idealHeight: 720)
         }
     }
 }

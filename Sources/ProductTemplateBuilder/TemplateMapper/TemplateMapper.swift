@@ -144,8 +144,9 @@ final class TemplateMapper {
         candidates.contains { ExcelHeaderNormalizer.matches(header, $0) }
     }
 
+    /// Stok kodunda ölçü/varyasyon ekinden önceki taban grup anahtarı: **son** `R` öncesine kadar (örn. `26BHR0005R15` → `26BHR0005`).
     private func stockPrefix(_ stockCode: String) -> String {
-        guard let range = stockCode.range(of: "R") else { return stockCode }
+        guard let range = stockCode.range(of: "R", options: .backwards) else { return stockCode }
         return String(stockCode[..<range.lowerBound])
     }
 

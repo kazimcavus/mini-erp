@@ -1,6 +1,6 @@
 # mini-erp — Ürün yükleme Excel şablonu
 
-macOS **SwiftUI** uygulaması: sabit bir ana `.xlsx` şablonunu, her ürün/varyant için `Bilgiler.xlsx` verileriyle doldurarak **çok satırlı ürün yükleme dosyası** üretir.
+macOS **SwiftUI** uygulaması: **gömülü** ana `.xlsx` şablonunu (ilk sayfa başlıkları + isteğe bağlı baseline satırı), her ürün/varyant için `Bilgiler.xlsx` verileriyle doldurarak **çok satırlı ürün yükleme dosyası** üretir.
 
 **EN:** Generates product-upload Excel from a master template plus per-variation `Bilgiler.xlsx` files—multi-color rows, categories, barcodes, Turkish price formatting, discounted/list price rules.
 
@@ -15,9 +15,11 @@ macOS **SwiftUI** uygulaması: sabit bir ana `.xlsx` şablonunu, her ürün/vary
 swift run ProductTemplateBuilder
 ```
 
-## Şablon yolu
+## Ana şablon (gömülü)
 
-Ana şablon dosyasının yolu kodda sabittir: `Sources/ProductTemplateBuilder/Models/AppModels.swift` içindeki `AppDefaults.mainTemplateURL`. Kendi ortamında bu yolu gerçek `.xlsx` dosyana göre güncelle.
+Dosya: `Sources/ProductTemplateBuilder/Resources/UrunYuklemeSablonu.xlsx`. **İlk satır** dışa aktarımda kullanılan sütun başlıklarıdır (birebir Ticimax şablonuyla aynı olmalı). **İkinci satır** yoksa veya boşsa baseline yok sayılır; bilinen başlıklar `TemplateMapper` ile, diğer sütunlar baseline’dan (varsa) kopyalanır. Çıktıda **Excel şablonu oluştur** ile **kaydet** panelinde istediğin klasöre yazılır.
+
+Şablonu güncellemek için bu dosyayı değiştirip projeyi yeniden derle.
 
 ## Özellikler (özet)
 
