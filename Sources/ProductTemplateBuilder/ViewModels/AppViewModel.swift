@@ -254,6 +254,34 @@ final class AppViewModel: ObservableObject {
         technicalDetailDraft = draft
     }
 
+    /// Foto çekimi gibi yapılarda ana klasörü seçip alt klasörlerdeki `Bilgiler.xlsx` dosyalarını
+    /// `{klasörAdı}.xlsx` olarak yeniden yazar (yalnız Fiyatlar + Varyasyon, formülsüz).
+    func batchNormalizeBilgilerFolders() {
+        guard let root = FilePanelService.chooseFolder(title: "Çekim ana klasörünü seçin (içinde ürün klasörleri)") else { return }
+        do {
+            let result = try BilgilerFolderBatchNormalizer.process(rootFolder: root, reader: reader, writer: writer)
+            var lines: [String] = [
+                "\(result.convertedCount) ürün klasörü işlendi: her birinde klasör adıyla .xlsx kaydedildi (sütunlar: Fiyatlar, Varyasyon; formül yok)."
+            ]
+            if result.skipped.isEmpty == false {
+                lines.append("Atlanan (\(result.skipped.count)): \(result.skipped.prefix(3).joined(separator: " · "))\(result.skipped.count > 3 ? " …" : "")")
+            }
+            if result.failures.isEmpty == false {
+                lines.append("Hata (\(result.failures.count)): \(result.failures.prefix(2).joined(separator: " · "))\(result.failures.count > 2 ? " …" : "")")
+            }
+            let message = lines.joined(separator: "\n")
+            if result.convertedCount == 0, result.failures.isEmpty == false {
+                status = .failure(message)
+            } else if result.convertedCount == 0 {
+                status = .warning(message)
+            } else {
+                status = .success(message)
+            }
+        } catch {
+            status = .failure(error.localizedDescription)
+        }
+    }
+
     func exportTechnicalDetailsTemplate() {
         guard let draft = technicalDetailDraft else { return }
         guard let outputURL = FilePanelService.saveXLSX(defaultName: "urun-teknik-detaylari.xlsx") else { return }

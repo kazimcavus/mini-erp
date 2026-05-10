@@ -1,16 +1,17 @@
 import Foundation
 
 final class ExcelReader {
-    func readFirstSheet(from url: URL) throws -> WorkbookTable {
+    /// - Parameter includeFullyEmptyRows: `true` ise veri satırlarında hiç dolu hücre olmasa bile satır korunur (Bilgiler toplu dönüşümü için).
+    func readFirstSheet(from url: URL, includeFullyEmptyRows: Bool = false) throws -> WorkbookTable {
         let archive = try XLSXArchive(sourceURL: url)
         let sheet = try archive.sheetPath(first: true)
-        return try readTable(archive: archive, sheetName: sheet.name, sheetPath: sheet.path)
+        return try readTable(archive: archive, sheetName: sheet.name, sheetPath: sheet.path, omitFullyEmptyRows: !includeFullyEmptyRows)
     }
 
     func readSheet(named name: String, from url: URL) throws -> WorkbookTable {
         let archive = try XLSXArchive(sourceURL: url)
         let sheet = try archive.sheetPath(named: name)
-        return try readTable(archive: archive, sheetName: sheet.name, sheetPath: sheet.path)
+        return try readTable(archive: archive, sheetName: sheet.name, sheetPath: sheet.path, omitFullyEmptyRows: true)
     }
 
     func readSheetIfExists(named name: String, from url: URL) throws -> WorkbookTable? {
@@ -18,7 +19,7 @@ final class ExcelReader {
         guard let sheet = try archive.allSheetPaths().first(where: { $0.name.localizedCaseInsensitiveCompare(name) == .orderedSame }) else {
             return nil
         }
-        return try readTable(archive: archive, sheetName: sheet.name, sheetPath: sheet.path)
+        return try readTable(archive: archive, sheetName: sheet.name, sheetPath: sheet.path, omitFullyEmptyRows: true)
     }
 
     func readHeaders(fromTemplate url: URL) throws -> [String] {
@@ -63,7 +64,7 @@ final class ExcelReader {
         return row
     }
 
-    private func readTable(archive: XLSXArchive, sheetName: String, sheetPath: String) throws -> WorkbookTable {
+    private func readTable(archive: XLSXArchive, sheetName: String, sheetPath: String, omitFullyEmptyRows: Bool) throws -> WorkbookTable {
         let sharedStrings = try readSharedStrings(archive: archive)
         let document = try archive.document(at: sheetPath)
         let rowNodes = try document.nodes(forXPath: "//*[local-name()='sheetData']/*[local-name()='row']")
@@ -82,17 +83,19 @@ final class ExcelReader {
         let headers = header.1.sorted(by: { Self.columnNumber($0.key) < Self.columnNumber($1.key) }).map(\.value)
         let columns = header.1.reduce(into: [String: String]()) { $0[$1.key] = $1.value }
 
-        let rows = parsedRows
+        var rows = parsedRows
             .filter { $0.0 > header.0 }
             .sorted(by: { $0.0 < $1.0 })
             .map { parsed -> [String: String] in
                 var row: [String: String] = [:]
-                for (column, header) in columns {
-                    row[header] = parsed.1[column] ?? ""
+                for (column, hdr) in columns {
+                    row[hdr] = parsed.1[column] ?? ""
                 }
                 return row
             }
-            .filter { row in row.values.contains { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty } }
+        if omitFullyEmptyRows {
+            rows = rows.filter { row in row.values.contains { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty } }
+        }
         return WorkbookTable(sheetName: sheetName, headers: headers, rows: rows)
     }
 

@@ -44,13 +44,11 @@ struct AppShellView: View {
 }
 
 struct SidebarView: View {
-    @EnvironmentObject private var viewModel: AppViewModel
-
     var body: some View {
         VStack(alignment: .leading, spacing: 22) {
             appIdentity
             FileSettingsView()
-            sidebarStats
+            SidebarExcelToolsView()
             Spacer()
         }
         .padding(22)
@@ -91,49 +89,6 @@ struct SidebarView: View {
         }
     }
 
-    private var sidebarStats: some View {
-        VStack(spacing: 10) {
-            SidebarStatusRow(title: "Ürün Kartı", value: "\(viewModel.products.count)", systemImage: "cube.box")
-            SidebarStatusRow(title: "Varyasyon", value: variationSummary, systemImage: "square.grid.2x2")
-            SidebarStatusRow(title: "Barkod Durumu", value: viewModel.startingBarcode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Boş" : "Hazır", systemImage: "barcode")
-        }
-    }
-
-    private var variationSummary: String {
-        viewModel.products.isEmpty ? "0" : "Hazır"
-    }
-
-}
-
-struct SidebarStatusRow: View {
-    let title: String
-    let value: String
-    let systemImage: String
-
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: systemImage)
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(AppTheme.accent)
-                .frame(width: 30, height: 30)
-                .background(AppTheme.accentSoft, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(.secondary)
-                Text(value)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(.primary.opacity(0.84))
-            }
-            Spacer()
-        }
-        .padding(12)
-        .background(Color.white.opacity(0.58), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(AppTheme.softBorder, lineWidth: 1)
-        }
-    }
 }
 
 struct MainHeaderView: View {
@@ -203,31 +158,15 @@ struct BottomActionBarView: View {
     }
 
     private var actionGroup: some View {
-        HStack(spacing: 10) {
-            Button {
-                viewModel.exportRelatedProductsTemplate()
-            } label: {
-                Label("İlgili Ürünler", systemImage: "link")
-            }
-            .buttonStyle(MacButtonStyle(kind: .secondary))
-
-            Button {
-                viewModel.prepareTechnicalDetailsTemplate()
-            } label: {
-                Label("Teknik Detaylar", systemImage: "list.clipboard")
-            }
-            .buttonStyle(MacButtonStyle(kind: .secondary))
-
-            Button {
-                viewModel.exportTemplate()
-            } label: {
-                Label("Excel Şablonu Oluştur", systemImage: "tablecells")
-            }
-            .buttonStyle(MacButtonStyle(kind: .primary))
-            .disabled(viewModel.products.isEmpty)
-            .opacity(viewModel.products.isEmpty ? 0.48 : 1)
-            .help(viewModel.products.isEmpty ? "Excel oluşturmak için önce ürün ekle." : "Ürün yükleme Excel şablonunu oluştur")
+        Button {
+            viewModel.exportTemplate()
+        } label: {
+            Label("Excel Şablonu Oluştur", systemImage: "tablecells")
         }
+        .buttonStyle(MacButtonStyle(kind: .primary))
+        .disabled(viewModel.products.isEmpty)
+        .opacity(viewModel.products.isEmpty ? 0.48 : 1)
+        .help(viewModel.products.isEmpty ? "Excel oluşturmak için önce ürün ekle." : "Ürün yükleme Excel şablonunu oluştur")
     }
 }
 

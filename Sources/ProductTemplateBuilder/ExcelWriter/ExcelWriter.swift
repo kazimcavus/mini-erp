@@ -17,6 +17,11 @@ final class ExcelWriter {
         )
     }
 
+    /// `Bilgiler.xlsx` için: yalnızca değer hücreleri (formül yok), `Fiyatlar` + `Varyasyon` (eski Metaryal metni).
+    func writeSimplifiedBilgilerExport(outputURL: URL, rows: [[String]]) throws {
+        try writeSimpleWorkbook(outputURL: outputURL, headers: ["Fiyatlar", "Varyasyon"], rows: rows)
+    }
+
     private func writeSimpleWorkbook(outputURL: URL, headers: [String], rows: [[String]]) throws {
         let workingURL = FileManager.default.temporaryDirectory
             .appendingPathComponent("simple-workbook-\(UUID().uuidString)", isDirectory: true)

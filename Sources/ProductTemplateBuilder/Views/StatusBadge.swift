@@ -5,10 +5,16 @@ struct StatusBadge: View {
     let message: String
 
     var body: some View {
-        Label(message, systemImage: icon)
-            .font(.callout)
-            .foregroundStyle(color)
-            .lineLimit(2)
+        Label {
+            Text(message)
+                .font(.callout)
+                .multilineTextAlignment(.leading)
+                .lineLimit(8)
+                .fixedSize(horizontal: false, vertical: true)
+        } icon: {
+            Image(systemName: icon)
+        }
+        .foregroundStyle(color)
     }
 
     private var icon: String {

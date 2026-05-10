@@ -183,3 +183,93 @@ struct FileSettingsView: View {
         }
     }
 }
+
+/// Ana üretim akışından ayrı, ek Excel araçları (sidebar).
+struct SidebarExcelToolsView: View {
+    @EnvironmentObject private var viewModel: AppViewModel
+
+    var body: some View {
+        CardContainer(padding: 16) {
+            VStack(alignment: .leading, spacing: 14) {
+                Label("Ek Excel araçları", systemImage: "wrench.and.screwdriver")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.primary.opacity(0.82))
+
+                Text("Ürün listesi oluşturmaktan bağımsız işlemler.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                VStack(spacing: 8) {
+                    toolRow(
+                        title: "İlgili Ürünler",
+                        subtitle: "Ticimax ürün listesi → ilişkilendirilmiş Excel",
+                        systemImage: "link",
+                        help: "Kaynak Excel’den OZELALAN1’a göre ilgili ürün satırları üretir."
+                    ) {
+                        viewModel.exportRelatedProductsTemplate()
+                    }
+
+                    toolRow(
+                        title: "Teknik Detaylar",
+                        subtitle: "Ticimax liste + Ürünler kaynağı→ şablon",
+                        systemImage: "list.clipboard",
+                        help: "İki Excel seçilir; Menşei seçimi penceresi açılır, ardından dışa aktarım yapılır."
+                    ) {
+                        viewModel.prepareTechnicalDetailsTemplate()
+                    }
+
+                    toolRow(
+                        title: "Çekim klasörleri",
+                        subtitle: "Bilgiler.xlsx → Fiyatlar + Varyasyon",
+                        systemImage: "camera.fill",
+                        help: "Ana klasör seçilir; alt klasörlerdeki Bilgiler dosyasından formülsüz, klasör adlı .xlsx üretilir."
+                    ) {
+                        viewModel.batchNormalizeBilgilerFolders()
+                    }
+                }
+            }
+        }
+    }
+
+    private func toolRow(
+        title: String,
+        subtitle: String,
+        systemImage: String,
+        help: String,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack(alignment: .top, spacing: 10) {
+                Image(systemName: systemImage)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(AppTheme.accent)
+                    .frame(width: 28, height: 28)
+                    .background(AppTheme.accentSoft, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(.primary.opacity(0.88))
+                        .multilineTextAlignment(.leading)
+                    Text(subtitle)
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .multilineTextAlignment(.leading)
+                }
+                Spacer(minLength: 0)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 10)
+            .background(Color.black.opacity(0.028), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .stroke(AppTheme.border, lineWidth: 1)
+            }
+        }
+        .buttonStyle(.plain)
+        .help(help)
+    }
+}

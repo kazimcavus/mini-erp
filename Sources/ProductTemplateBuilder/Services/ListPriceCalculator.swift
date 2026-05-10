@@ -69,6 +69,26 @@ enum ListPriceCalculator {
         return s
     }
 
+    /// Çekim klasörleri `Fiyatlar` çıktısı: yüzen noktalı yazımı düzeltir (örn. `2870.39999…` → `2870,40`); tam sayıysa virgül yok (`4524`).
+    static func formatSimplifiedBilgilerFiyat(_ raw: String) -> String {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, let value = parseDecimal(trimmed) else { return raw }
+        var scaled = value
+        var rounded = Decimal()
+        NSDecimalRound(&rounded, &scaled, 2, .plain)
+        let nf = NumberFormatter()
+        nf.locale = Locale(identifier: "tr_TR")
+        nf.numberStyle = .decimal
+        nf.usesGroupingSeparator = false
+        nf.minimumFractionDigits = 2
+        nf.maximumFractionDigits = 2
+        guard var s = nf.string(from: NSDecimalNumber(decimal: rounded)) else { return raw }
+        if s.hasSuffix(",00") {
+            s = String(s.dropLast(3))
+        }
+        return s
+    }
+
     /// Hücre metni sayıya çevrilebiliyorsa aynı Türkçe düzene getirir; metin veya boşsa olduğu gibi bırakır.
     static func formatPlainTurkishIfNumeric(_ raw: String) -> String {
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
