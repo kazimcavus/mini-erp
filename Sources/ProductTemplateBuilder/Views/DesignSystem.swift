@@ -187,6 +187,7 @@ struct FileSettingsView: View {
 /// Ana üretim akışından ayrı, ek Excel araçları (sidebar).
 struct SidebarExcelToolsView: View {
     @EnvironmentObject private var viewModel: AppViewModel
+    @Binding var showingPriceUpdate: Bool
 
     var body: some View {
         CardContainer(padding: 16) {
@@ -201,6 +202,15 @@ struct SidebarExcelToolsView: View {
                     .fixedSize(horizontal: false, vertical: true)
 
                 VStack(spacing: 8) {
+                    toolRow(
+                        title: "Fiyat Güncelleme",
+                        subtitle: "Ürün listesi + SKU fiyat listesi → güncel liste",
+                        systemImage: "tag",
+                        help: "SKU ve metrekare fiyatına göre ürün listesindeki fiyat kolonlarını günceller."
+                    ) {
+                        showingPriceUpdate = true
+                    }
+
                     toolRow(
                         title: "İlgili Ürünler",
                         subtitle: "Ürün listesi Excel’i → ilişkilendirilmiş Excel",

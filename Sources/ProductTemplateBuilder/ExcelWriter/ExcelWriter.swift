@@ -17,6 +17,10 @@ final class ExcelWriter {
         )
     }
 
+    func writeWorkbook(outputURL: URL, headers: [String], rows: [[String]]) throws {
+        try writeSimpleWorkbook(outputURL: outputURL, headers: headers, rows: rows)
+    }
+
     /// `Bilgiler.xlsx` için: yalnızca değer hücreleri (formül yok), `Fiyatlar` + `Varyasyon` (eski Metaryal metni).
     func writeSimplifiedBilgilerExport(outputURL: URL, rows: [[String]]) throws {
         try writeSimpleWorkbook(outputURL: outputURL, headers: ["Fiyatlar", "Varyasyon"], rows: rows)

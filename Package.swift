@@ -22,6 +22,10 @@ let package = Package(
                 .copy("Resources/Tip4Onyazi.html"),
                 .copy("Resources/Tip5Onyazi.html"),
             ]
+        ),
+        .testTarget(
+            name: "ProductTemplateBuilderTests",
+            dependencies: ["ProductTemplateBuilder"]
         )
     ]
 )

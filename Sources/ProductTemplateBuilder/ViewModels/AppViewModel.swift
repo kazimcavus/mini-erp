@@ -22,6 +22,7 @@ final class AppViewModel: ObservableObject {
     private let mapper = TemplateMapper()
     private let relatedProductsBuilder = RelatedProductsBuilder()
     private let technicalDetailsBuilder = TechnicalDetailsBuilder()
+    private let priceUpdateBuilder = PriceUpdateBuilder()
 
     init() {
         if let selection = EmbeddedCatalog.categorySelections.first {
@@ -232,6 +233,40 @@ final class AppViewModel: ObservableObject {
         }
     }
 
+    @discardableResult
+    func exportPriceUpdateTemplate(strikeThroughPreset: StrikeThroughDiscountPreset) -> Bool {
+        guard let productURL = FilePanelService.chooseXLSX(title: "Ürün listesi Excel dosyasını seç") else { return false }
+        guard let priceURL = FilePanelService.chooseXLSX(title: "SKU ve fiyat listesini seç") else { return false }
+
+        do {
+            let productTable = try reader.readFirstSheet(from: productURL)
+            let priceTable = try reader.readFirstSheet(from: priceURL)
+            let result = try priceUpdateBuilder.makeExport(
+                productTable: productTable,
+                priceTable: priceTable,
+                preset: strikeThroughPreset
+            )
+
+            guard let outputURL = FilePanelService.saveXLSX(defaultName: "fiyat-guncelleme-urun-listesi.xlsx") else { return false }
+            try writer.writeWorkbook(outputURL: outputURL, headers: result.headers, rows: result.rows)
+
+            var messages = [
+                "Fiyat güncelleme Excel'i \(result.rows.count) satırla oluşturuldu (\(result.matchedSKUCount) SKU)."
+            ]
+            if !result.unmatchedPriceSKUs.isEmpty {
+                messages.append("\(result.unmatchedPriceSKUs.count) SKU ürün listesinde bulunamadı: \(preview(result.unmatchedPriceSKUs))")
+            }
+            if !result.invalidPriceSKUs.isEmpty {
+                messages.append("\(result.invalidPriceSKUs.count) fiyat satırı atlandı: \(preview(result.invalidPriceSKUs))")
+            }
+            status = .success(messages.joined(separator: "\n"))
+            return true
+        } catch {
+            status = .failure(error.localizedDescription)
+            return false
+        }
+    }
+
     func prepareTechnicalDetailsTemplate() {
         guard let ticimaxURL = FilePanelService.chooseXLSX(title: "Ürün listesi Excel dosyasını seç") else { return }
         guard let sourceURL = FilePanelService.chooseXLSX(title: "Ürünler.xlsx teknik detay kaynak listesini seç") else { return }
@@ -343,5 +378,10 @@ final class AppViewModel: ObservableObject {
         } catch {
             status = .failure(error.localizedDescription)
         }
+    }
+
+    private func preview(_ values: [String], limit: Int = 5) -> String {
+        let shown = values.prefix(limit).joined(separator: ", ")
+        return values.count > limit ? "\(shown), …" : shown
     }
 }

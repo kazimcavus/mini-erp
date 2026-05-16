@@ -9,10 +9,11 @@ struct MainView: View {
 struct AppShellView: View {
     @EnvironmentObject private var viewModel: AppViewModel
     @State private var showingAddProduct = false
+    @State private var showingPriceUpdate = false
 
     var body: some View {
         HStack(spacing: 0) {
-            SidebarView()
+            SidebarView(showingPriceUpdate: $showingPriceUpdate)
                 .frame(width: 300)
 
             VStack(spacing: 18) {
@@ -30,6 +31,11 @@ struct AppShellView: View {
                 .environmentObject(viewModel)
                 .frame(minWidth: 1040, minHeight: 680)
         }
+        .sheet(isPresented: $showingPriceUpdate) {
+            PriceUpdateView()
+                .environmentObject(viewModel)
+                .frame(minWidth: 520, minHeight: 360)
+        }
         .sheet(item: $viewModel.editingProduct) { product in
             EditProductView(product: product)
                 .environmentObject(viewModel)
@@ -45,11 +51,13 @@ struct AppShellView: View {
 }
 
 struct SidebarView: View {
+    @Binding var showingPriceUpdate: Bool
+
     var body: some View {
         VStack(alignment: .leading, spacing: 22) {
             appIdentity
             FileSettingsView()
-            SidebarExcelToolsView()
+            SidebarExcelToolsView(showingPriceUpdate: $showingPriceUpdate)
             Spacer()
         }
         .padding(22)
